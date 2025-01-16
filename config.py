@@ -7,6 +7,6 @@ DB_NAME = 'database.db'
 current_path = Path.cwd()
 theory_files_dir = current_path / 'datafiles' / 'theory_files'
 
-token = '7216185828:AAHNlXJpm94oSlbZPaMbHrMI-1iODxr2TWA'
+token = '8095942189:AAFx6uZ5Gi-UF6IRChlfnYv9JIF4r9Lf0T8'
 # Обьект для взаимодействия с TelegramAPI
 bot = telebot.TeleBot(token)
