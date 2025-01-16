@@ -29,8 +29,7 @@ def chat(message, returned_main_menu):
                                                                       user_id)
 
         if str_of_user_messages:
-            bot_text = gpt_service.get_gpt_analysis(str_of_user_messages,
-                                                    user_level_name)
+            bot_text = gpt_service.get_gpt_analysis(str_of_user_messages, user_level_name)
             bot.send_message(message.chat.id, bot_text)
 
             working_with_SQL.clear_table(DB_NAME, user_id)
@@ -38,13 +37,16 @@ def chat(message, returned_main_menu):
             returned_main_menu(message)
 
         else:
-            bot.send_message(message.chat.id,
-                             'Диалог только начался! Нечего анализировать')
+            bot.send_message(message.chat.id,'Диалог только начался! Нечего анализировать')
 
             returned_main_menu(message)
 
     #Блок 'else' отправляет сообщения chat-gpt в роли собеседника
     else:
+        markup = types.InlineKeyboardMarkup()
+        button_translate = types.InlineKeyboardButton('Перевод', callback_data='translate')
+        markup.add(button_translate)
+
         user_id = message.from_user.id
         user_level_id = working_with_SQL.get_level_id(DB_NAME, user_id)
         user_level_name = working_with_SQL.get_level_name(DB_NAME, user_level_id)
@@ -56,6 +58,6 @@ def chat(message, returned_main_menu):
         bot_text = gpt_service.get_gpt_message(user_level_name, all_chat)
         working_with_SQL.save_bot_message(DB_NAME, user_id, bot_text)
 
-        bot.send_message(message.chat.id, bot_text)
+        bot.send_message(message.chat.id, bot_text, reply_markup=markup)
 
         bot.register_next_step_handler(message, chat, returned_main_menu=returned_main_menu)
