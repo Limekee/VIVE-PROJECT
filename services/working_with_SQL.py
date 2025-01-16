@@ -76,6 +76,7 @@ def initialization_db(name):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             task TEXT,
             answer TEXT,
+            explanation TEXT,
             theory_id INTEGER,
             FOREIGN KEY (theory_id) REFERENCES theory(id)
         )
@@ -159,8 +160,8 @@ def fill_db(name):
             list_strings = prepare_file_for_db(practice_path)
             formatted_rows = [(*row[:-1], int(row[-1])) for row in list_strings]
             cursor.executemany('''
-            INSERT INTO practice (task, answer, theory_id)
-            VALUES (?, ?, ?)
+            INSERT INTO practice (task, answer, explanation, theory_id)
+            VALUES (?, ?, ?, ?)
             ''', formatted_rows)
 
         connection.commit()
@@ -263,6 +264,18 @@ def get_practice_by_theory_id(name, theory_id):
         WHERE theory_id == ?
         """, (theory_id,))
         practice = cursor.fetchall()
+        return practice
+
+
+def get_practice_by_practice_id(name, practice_id):
+    with sqlite3.connect(name) as connect:
+        cursor = connect.cursor()
+        cursor.execute("""
+        SELECT *
+        FROM practice
+        WHERE id == ?
+        """, (practice_id,))
+        practice = cursor.fetchone()
         return practice
 
 
