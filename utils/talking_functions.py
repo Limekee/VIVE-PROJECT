@@ -16,6 +16,9 @@ def talking_output(message, returned_main_menu):
     button_analytics = types.KeyboardButton('Аналитика')
     markup.add(button_analytics)
 
+    text = ("Можете начинать общение!\n"
+            "P.S. В данной версии чат-бота доступна обработка голосового сообщения\n"
+            "Отправляйте по одному голосовому сообщению на один ответ чат-бота.")
     bot.send_message(message.chat.id, "Можете начинать общение!", reply_markup=markup)
 
     bot.register_next_step_handler(message, detect_content_type, returned_main_menu=returned_main_menu)
@@ -23,16 +26,17 @@ def talking_output(message, returned_main_menu):
 
 def detect_content_type(message, returned_main_menu):
     if message.content_type == 'voice':
+        user_id = message.from_user.id
         file_info = bot.get_file(message.voice.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
 
         # Сохраняем файл временно
-        ogg_filename = "voice.ogg"
+        ogg_filename = f"voice_{user_id}.ogg"
         with open(ogg_filename, "wb") as f:
             f.write(downloaded_file)
 
         # Конвертация в WAV
-        wav_filename = "voice.wav"
+        wav_filename = f"voice_{user_id}.wav"
         data, samplerate = sf.read(ogg_filename)
         sf.write(wav_filename, data, samplerate)
 
