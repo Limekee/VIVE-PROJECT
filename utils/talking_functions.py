@@ -1,3 +1,6 @@
+import os
+import soundfile as sf
+import speech_recognition as sr
 from config import bot, DB_NAME
 from telebot import types
 from services import working_with_SQL
@@ -15,12 +18,55 @@ def talking_output(message, returned_main_menu):
 
     bot.send_message(message.chat.id, "Можете начинать общение!", reply_markup=markup)
 
-    bot.register_next_step_handler(message, chat, returned_main_menu=returned_main_menu)
+    bot.register_next_step_handler(message, detect_content_type, returned_main_menu=returned_main_menu)
 
 
-def chat(message, returned_main_menu):
+def detect_content_type(message, returned_main_menu):
+    if message.content_type == 'voice':
+        file_info = bot.get_file(message.voice.file_id)
+        downloaded_file = bot.download_file(file_info.file_path)
+
+        # Сохраняем файл временно
+        ogg_filename = "voice.ogg"
+        with open(ogg_filename, "wb") as f:
+            f.write(downloaded_file)
+
+        # Конвертация в WAV
+        wav_filename = "voice.wav"
+        data, samplerate = sf.read(ogg_filename)
+        sf.write(wav_filename, data, samplerate)
+
+        # Распознавание речи
+        recognizer = sr.Recognizer()
+        with sr.AudioFile(wav_filename) as source:
+            audio = recognizer.record(source)
+
+        try:
+            # Используем Google Web Speech API для распознавания
+            text = recognizer.recognize_google(audio, language='en-EN')  # Замените на нужный язык
+
+            chat(message, returned_main_menu, text)
+        except sr.UnknownValueError:
+            bot.reply_to(message, 'Не удалось распознать аудио.')
+        except sr.RequestError as e:
+            bot.reply_to(message, f'Ошибка сервиса распознавания: {e}')
+
+        # Удаляем временные файлы
+        os.remove(ogg_filename)
+        os.remove(wav_filename)
+
+    elif message.content_type == 'text':
+        text = message.text
+
+        chat(message, returned_main_menu, text)
+
+    else:
+        bot.send_message(message.chat.id, 'Неккоректный ввод')
+
+
+def chat(message, returned_main_menu, text):
     # Данный блок "if" отправляет пользователю аналитику по чату
-    if message.text.lower() == 'аналитика':
+    if text.lower() == 'аналитика':
         user_id = message.from_user.id
         user_level_id = working_with_SQL.get_level_id(DB_NAME, user_id)
         user_level_name = working_with_SQL.get_level_name(DB_NAME,
@@ -41,6 +87,7 @@ def chat(message, returned_main_menu):
 
             returned_main_menu(message)
 
+
     #Блок 'else' отправляет сообщения chat-gpt в роли собеседника
     else:
         markup = types.InlineKeyboardMarkup()
@@ -51,7 +98,7 @@ def chat(message, returned_main_menu):
         user_level_id = working_with_SQL.get_level_id(DB_NAME, user_id)
         user_level_name = working_with_SQL.get_level_name(DB_NAME, user_level_id)
 
-        user_text = message.text
+        user_text = text
         working_with_SQL.save_user_message(DB_NAME, user_id, user_text)
         all_chat = working_with_SQL.get_all_chat(DB_NAME, user_id)
 
@@ -60,4 +107,4 @@ def chat(message, returned_main_menu):
 
         bot.send_message(message.chat.id, bot_text, reply_markup=markup)
 
-        bot.register_next_step_handler(message, chat, returned_main_menu=returned_main_menu)
+        bot.register_next_step_handler(message, detect_content_type, returned_main_menu=returned_main_menu)
