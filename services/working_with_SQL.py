@@ -139,20 +139,6 @@ def fill_db(name):
             VALUES (?, ?, ?, ?, ?)
             ''', formatted_rows)
 
-        # Заполнение таблицы vocabulary
-        cursor.execute('SELECT COUNT(*) FROM `vocabulary`')
-        if cursor.fetchone()[0] == 0:
-            vocabulary = [*prepare_file_for_vocabulary(Levels.A1, 'a1_words'),
-                         *prepare_file_for_vocabulary(Levels.A2, 'a2_words'),
-                         *prepare_file_for_vocabulary(Levels.B1, 'b1_words'),
-                         *prepare_file_for_vocabulary(Levels.B2, 'b2_words'),
-                         *prepare_file_for_vocabulary(Levels.C1, 'c1_words')]
-            # Данные для vocabulary
-            cursor.executemany('''
-                INSERT INTO vocabulary (level_id, english_word, russian_word, is_the_word_known)
-                VALUES (?, ?, ?, False)
-                ''', vocabulary)
-
         # Заполнение таблицы practice
         cursor.execute('SELECT COUNT(*) FROM practice')
         if cursor.fetchone()[0] == 0:
