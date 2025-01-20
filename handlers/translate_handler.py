@@ -11,4 +11,4 @@ def register_translate_handler():
 
         changed_text = f'{gpt_message}\n' + '-' * 20 + '\n' + translated_last_gpt_message
 
-        bot.edit_message_text(changed_text, callback.message.chat.id, callback.message.message_id)
+        bot.edit_message_text(changed_text, callback.message.chat.id, callback.message.message_id, reply_markup=None)
