@@ -3,7 +3,7 @@ from telebot import types
 from .level_selection_functions import level_selection
 from .plan_functions import plan_output
 from .talking_functions import talking_output
-from .vocabulary_functions import vocabulary_output
+from .vocabulary_functions import selecting_mode
 
 
 def main_menu_processing(message):
@@ -17,7 +17,7 @@ def main_menu_processing(message):
         talking_output(message, main_menu_markup)
 
     elif message.text.lower() == 'словарь':
-        vocabulary_output(message, main_menu_markup)
+        selecting_mode(message, main_menu_markup)
 
 
 def main_menu_markup(message):
