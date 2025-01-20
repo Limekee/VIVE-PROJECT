@@ -13,15 +13,13 @@ def get_gpt_analysis(str_of_user_messages, user_level_name):
     Возвращает текст аналитики
     """
     prompt_for_gpt = (
-        f"Твоя задача проанализировать предложения на наличие ошибок и вывести выявленные ошибки по пунктам,"
-        f"Учитывая уровень пользователя: {user_level_name} "
-        f"Анализ должен быть на русском, но цитируемые слова и предложения переводить на русский не нужно. "
-        f"Проводи анализ даже если предложение состоит только из 1 слова. Если анализ состоит из 1 пункта, то его не нужно нумеровать. "
-        f"Пунктуационные ошибки в анализ включать не нужно "
+        f"Your task is to analyze sentences for errors and list the identified errors point by point. "
+        f"The analysis should be in Russian, considering that the user's language proficiency level is {user_level_name}, but quoted words and sentences should not be translated into Russian. "
+        f"Perform the analysis even if the sentence consists of only one word. If the analysis contains only one error, do not number it as a point. Do not include punctuation errors in the analysis. "
     )
 
     completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         messages=
         [
             {
@@ -45,16 +43,11 @@ def get_gpt_message(user_level_name, all_chat):
 
     Возвращает текст сообщения
     """
-    prompt_for_gpt = (f"You are human. "
-                      f"You are the user's friend. "
-                      f"Your task is to engage in a dialogue in English at the {user_level_name} level. "
-                      f"You understand only English and must formulate your responses exclusively in English. "
-                      f"Match the user's tone and style of communication. "
-                      f"Avoid lecturing or instructing the user on how to behave. "
-                      f"If something bothers you, express your opinion naturally, as a human would.")
+    prompt_for_gpt = (f"You are an Englishman who is having a dialogue with your friend at the {user_level_name} level. "
+                      f"You don't understand languages other than English.")
 
     completion = client.chat.completions.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         messages=
         [
             {
